@@ -1,0 +1,87 @@
+Sub calc_time()
+Dim def1, sum1, count1 As Variant
+'计算本周总工时
+sum1 = 0
+count1 = 0
+
+For i = 1 To 31
+    def1 = 0
+   If Sheet1.Cells(i, 2) = "" Or Sheet1.Cells(i, 1) = "" Then
+     GoTo t
+    End If
+    def1 = tran_time(Left(Sheet1.Cells(i, 2), 8), Left(Sheet1.Cells(i, 1), 8))
+    Sheet1.Cells(i, 3) = def1
+    sum1 = sum1 + def1
+    count1 = count1 + 1
+t: Next
+
+
+Sheet1.Cells(7, 5) = "天数："
+Sheet1.Cells(8, 5) = "总工时："
+Sheet1.Cells(9, 5) = "平均："
+
+Sheet1.Cells(7, 6) = count1
+Sheet1.Cells(8, 6) = sum1
+
+If count1 = 0 Then
+Sheet1.Cells(9, 6) = 0
+Else
+Sheet1.Cells(9, 6) = sum1 / count1
+End If
+
+End Sub
+Public Function tran_time(x As Variant, y As Variant) As Variant
+Dim xx, yy, am1, am2, pm1, pm2, pm3, mid As Variant
+xx = Hour(x) + Minute(x) / 60
+yy = Hour(y) + Minute(y) / 60
+pm2 = 17.5
+pm3 = 18
+am1 = 9
+am2 = 12
+pm1 = 13.5
+
+'上午请假
+If yy > 9 Then
+    If yy < am2 Then
+            If xx < 17.5 Then
+                tran_time = xx - yy - 1.5
+            ElseIf xx < 18 Then
+                tran_time = pm2 - yy - 1.5
+            Else
+                tran_time = xx - yy - 2
+            End If
+    ElseIf yy > am2 Then
+        If yy < pm1 Then
+            If xx < 17.5 Then
+                tran_time = xx - pm1
+            ElseIf xx < 18 Then
+                tran_time = pm2 - pm1
+            Else
+                tran_time = xx - pm1 - 0.5
+            End If
+        Else
+            If xx < 17.5 Then
+                tran_time = xx - yy
+            ElseIf xx < 18 Then
+                tran_time = pm2 - yy
+            Else
+                tran_time = xx - yy - 0.5
+            End If
+        End If
+    End If
+Else
+    '下午请假
+    If xx < am2 Then
+        tran_time = xx - yy
+    ElseIf xx < pm1 Then
+        tran_time = am2 - yy
+    ElseIf xx < 17.5 Then
+    tran_time = xx - yy - 1.5
+    '正常上班
+    ElseIf xx < 18 Then
+    tran_time = pm2 - yy - 1.5
+    Else
+    tran_time = xx - yy - 2
+    End If
+End If
+End Function
